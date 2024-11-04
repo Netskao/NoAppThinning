@@ -1,57 +1,74 @@
 /* Source: https://gist.github.com/level3tjg/813f7269a405b00203484382da18d3bf */
 /* Credits: level3tjg */
 
-#import <MobileGestalt/MobileGestalt.h>
+#import <UIKit/UIKit.h>
 
-NSString *deviceClass;
+static NSString *const kDeviceType = @"iPhone";
 
 %hook XDCDevice
 - (NSString *)productType {
-    return deviceClass;
+    return kDeviceType;
 }
 %end
 
 %hook Device
 - (NSArray<NSString *> *)productVariants {
-    return @[ deviceClass ];
+    return @[kDeviceType];
 }
 %end
 
 %hook SSDevice
 - (NSString *)productType {
-    return deviceClass;
+    return kDeviceType;
 }
 - (NSString *)compatibleProductType {
-    return deviceClass;
+    return kDeviceType;
 }
 %end
 
 %hook AMSDevice
 + (NSString *)productType {
-    return deviceClass;
+    return kDeviceType;
 }
 + (NSString *)compatibleProductType {
-    return deviceClass;
+    return kDeviceType;
 }
 + (NSString *)_lib_compatibleProductType {
-    return deviceClass;
+    return kDeviceType;
 }
 %end
 
-//In TestFlight App TestFlightServices.framework
+// TestFlight Hooks
+static BOOL isRequestNewApp = NO;
+
 %hook TFCurrentDevice
-- (NSArray<NSString *> *)compatibleAppVariants {
-    return @[deviceClass];
-}
-+ (NSString *)model {
-    return deviceClass;
-}
-//3.6.0+
 + (NSArray<NSString *> *)compatibleAppVariants {
-    return @[deviceClass];
+    if (isRequestNewApp) return %orig;
+    return @[kDeviceType];
 }
 %end
 
-%ctor {
-    deviceClass = (__bridge NSString *)MGCopyAnswer(kMGDeviceClass, NULL);
+// Flag to add a new application request
+%hook TFHallidayService
+- (void)requestAppForPublicLinkToken:(id)arg1 completion:(void (^)(id response, id error))completion {
+    isRequestNewApp = YES;
+    completion = ^(id response, id error) {
+    if (!error) {
+    isRequestNewApp = NO;
+    }
+    completion(response, error);
+    };
+    return %orig;
 }
+
+- (void)postAcceptPublicLinkWithToken:(id)arg1 completion:(void (^)(id response, id error))completion {
+    isRequestNewApp = YES;
+    completion = ^(id response, id error) {
+    if (!error) {
+    isRequestNewApp = NO;
+    }
+    completion(response, error);
+    };
+    return %orig;
+}
+%end
