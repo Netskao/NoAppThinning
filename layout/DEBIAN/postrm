@@ -1,5 +1,6 @@
 #!/bin/sh
 echo "Reloading services..."
 launchctl kickstart -k system/com.apple.itunesstored
+killall -9 TestFlight
 echo "Reloaded services."
 exit 0

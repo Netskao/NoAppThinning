@@ -2,6 +2,7 @@
 echo "Reloading services..."
 launchctl unload /System/Library/LaunchDaemons/com.apple.appstored.plist
 launchctl unload /System/Library/LaunchDaemons/com.apple.itunesstored.plist
+killall -9 TestFlight
 sleep 1
 launchctl load /System/Library/LaunchDaemons/com.apple.appstored.plist
 launchctl load /System/Library/LaunchDaemons/com.apple.itunesstored.plist

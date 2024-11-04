@@ -38,6 +38,20 @@ NSString *deviceClass;
 }
 %end
 
+//In TestFlight App TestFlightServices.framework
+%hook TFCurrentDevice
+- (NSArray<NSString *> *)compatibleAppVariants {
+    return @[deviceClass];
+}
++ (NSString *)model {
+    return deviceClass;
+}
+//3.6.0+
++ (NSArray<NSString *> *)compatibleAppVariants {
+    return @[deviceClass];
+}
+%end
+
 %ctor {
     deviceClass = (__bridge NSString *)MGCopyAnswer(kMGDeviceClass, NULL);
 }
